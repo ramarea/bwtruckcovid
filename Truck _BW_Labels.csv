@@ -1,0 +1,23 @@
+Label,Definition
+TLK_ARR,Tlokweng Arrivals
+TLL_DEP,Tlokweng Departures
+RMT_ARR,Ramatlabama Arrivals
+RMT_DEP,Ramatlabama Departures
+MTD_ARR,Martin's Drift Arrivals
+MTD_DEP,Martin's Drift Departures
+PIO_ARR,Pioneer Arrivals
+PIO_DEP,Pioneer Departures
+MAM_ARR,Mamuno Arrivals
+MAM_DEP,Mamuno Departures
+KZB_ARR,Kazungula Road Border Arrivals
+KZB_DEP,Kazungula Road Border Departures
+KZF_ARR,Kazungula Ferry Arrivals
+KZF_DEP,Kazungula Ferry Departures
+NGO_ARR,Ngoma Arrivals
+NGO_DEP,Ngoma Departures
+RMK_ARR,Ramokgwebana Arrivals
+RMK_DEP,Ramokgwebana Departures
+MOH_ARR,Mohembo Arrivals
+MOH_DEP,Mohembo Departures
+TOT_ARR,Total Arrivals
+TOT_DEP,Total Departures
