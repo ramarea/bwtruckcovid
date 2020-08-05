@@ -1,4 +1,4 @@
-# Ramarea, Tumisang
+# Author: Ramarea, Tumisang
 # Summer 2020
 # Covid-19: Mitigating Potential Propagation by Truck Drivers in Botswana
 # Model Simulation
@@ -9,19 +9,19 @@ import matplotlib.pyplot as plt
 
 # Initial Values
 time = 0
-S_0_T = 4200 # Initial Susceptible Truck Drivers
+S_0_T = 4198 # Initial Susceptible Truck Drivers
 S_0_E = 10000 # Initial Susceptible Essential Workers
-S_0_O = 2400000 # Initial Susceptible Other Population
-I_0_T = 5 # Initial Infected Truck Drivers
-I_0_E = 2 # Initial Infected Essential Workers
+S_0_O = 2250000 # Initial Susceptible Other Population
+I_0_T = 2 # Initial Infected Truck Drivers
+I_0_E = 0 # Initial Infected Essential Workers
 I_0_O = 23 # Initial Infected Other Population
 R_0_T = 0 # Initial Recovered Truck Drivers
 R_0_E = 0 # Initial Recovered Essential Workers
-R_0_O = 0 # Initial Recovered Other Population
+R_0_O = 12 # Initial Recovered Other Population
 D_0 = 1 # Initial Total Covid-19 Deaths
 
 # Estimated Model Parameter Values, determined as explained
-beta_0 = 0.01 # probability of weekly covid-19 transmission from the external world to TD
+beta_0 = 0.000526 # probability of weekly covid-19 transmission from the external world to TD
 beta_TT = 0.0000001 # probability of weekly covid transmission between TD
 beta_TE = 0.0000001 # probability of weekly covid transmission to TD from EW
 beta_TO = 0.0000001 # # probability of weekly covid transmission to TD from RP
@@ -31,12 +31,18 @@ beta_EO = 0.0000001 # probability of weekly covid transmission to EW from RP
 beta_OT = 0.0000001 # probability of weekly covid transmission to RP from TD
 beta_OE = 0.0000001 # probability of weekly covid transmission to RP from EW
 beta_OO = 0.0000001 # probability of weekly covid transmission between RP
-alpha_T = 0.1 # 
+alpha_T = 0.1
 alpha_E = 0.1
 alpha_O = 0.1
-gamma_T = 0.014
-gamma_E = 0.014
-gamma_O = 0.014
+gamma_T = 0.0025
+gamma_E = 0.0025
+gamma_O = 0.0025
+
+# Costs assiciated with policies
+vsl = 2600000 # value of statistical life, estimated in vslestbw.py
+quar_costs = 45 * 7 # weekly costs per person of being quarantined
+isop_costs = S_0_E * quar_costs # weekly costs of the isolated operation strategy
+
 
 #Initiate State Variables
 
@@ -109,7 +115,7 @@ def simulate(arr_init, p_params):
                              'Infected EW', 'Recovered EW','Susceptible RP', 'Infected RP', 'Recovered RP','Deaths'])
     time = arr_init[0,0]
     arr_in = arr_init
-    while time < 200:
+    while time < 52:
         arr_out = oneStepUpdate(arr_in, p_params)
         df2 = pd.DataFrame(arr_out, columns = ['Time', 'Susceptible TD', 'Infected TD', 'Recovered TD','Susceptible EW', 
                              'Infected EW', 'Recovered EW','Susceptible RP', 'Infected RP', 'Recovered RP','Deaths'])
@@ -123,10 +129,18 @@ def simulate(arr_init, p_params):
 def compare(df_dn, df_io, df_dr):
     df_dn = df_dn.rename(columns = {'Deaths':'Do Nothing Deaths'})
     df_io = df_io.rename(columns = {'Deaths':'Isolated Operation Deaths'})
-    df_dr = df_dr.rename(columns = {'Deaths':'Driver Relay Deaths'})
-    data = [df_dn['Time'],df_dn['Do Nothing Deaths'], df_io['Isolated Operation Deaths'], df_dr['Driver Relay Deaths']]
-    headers = ['Time', 'Do Nothing Deaths', 'Isolated Operation Deaths','Driver Relay Deaths']
+    df_dr = df_dr.rename(columns = {'Deaths':'Relay Driving Deaths'})
+    data = [df_dn['Time'],df_dn['Do Nothing Deaths'], df_io['Isolated Operation Deaths'], df_dr['Relay Driving Deaths']]
+    headers = ['Time', 'Do Nothing Deaths', 'Isolated Operation Deaths','Relay Driving Deaths']
     df = pd.concat(data, axis = 1, keys = headers)
+    return df
+    
+def generateCosts(df):
+    print('I am generating costs')
+    print(df)
+    print('The VSL is: ' + str(vsl))
+    print('The S_t_E is: ' + str(S_0_E))
+    print('The costs of the isolated strategy are: ' + str(isop_costs))
     return df
 
 # Our model implementation first simulates the Do Nothing policy dynamics, followed by the isolated operation
@@ -138,15 +152,17 @@ def main():
     dn_params = np.array([beta_0, beta_TT, beta_TE, beta_TO, beta_ET, beta_EE, beta_EO, beta_OT, beta_OE, beta_OO])
     df_dn = simulate(arr_init, dn_params)
     # simulate the isolated operation policy
-    io_params = np.array([beta_0, beta_TT, beta_TE, 0 * beta_TO, beta_ET, beta_EE, 0.2 * beta_EO, 0*beta_OT, 0.2 * beta_OE, beta_OO])
+    io_params = np.array([beta_0, beta_TT, beta_TE, 0.415 * beta_TO, beta_ET, beta_EE, 0.415 * beta_EO, 0.415*beta_OT, 0.415 * beta_OE, beta_OO])
     df_io = simulate(arr_init, io_params)
     # simulate the driver relay policy
-    dr_params = np.array([0.5 * beta_0, beta_TT, beta_TE, beta_TO, beta_ET, beta_EE, beta_EO, beta_OT, beta_OE, beta_OO])
+    dr_params = np.array([0.0001 * beta_0, beta_TT, beta_TE, beta_TO, beta_ET, beta_EE, beta_EO, beta_OT, beta_OE, beta_OO])
     df_dr = simulate(arr_init, dr_params)
+    # run a comparison of the deaths across the different policy interventions
     df = compare(df_dn, df_io, df_dr)
-    print(df)
-    df.plot(x = 'Time', y = ['Do Nothing Deaths', 'Isolated Operation Deaths','Driver Relay Deaths'])
+    print(df) # delete in the end
+    df.plot(x = 'Time', y = ['Do Nothing Deaths', 'Isolated Operation Deaths','Relay Driving Deaths'])
     plt.show()
+    df = generateCosts(df)
 
 if __name__ == '__main__':
     main()
