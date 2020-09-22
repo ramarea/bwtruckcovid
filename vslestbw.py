@@ -15,6 +15,7 @@ df = pd.DataFrame(np.array([['Canada',7600000.00,46232.99], ['China',2500000.00,
 GDPPC = df.iloc[:, 2].values.reshape(-1, 1)
 VVSL = df.iloc[:, 1].values.reshape(-1, 1)  
 lm = LinearRegression()  
-lm.fit(GDPPC, VVSL) 
-BW_VVSL = linear_regressor.predict(8258.64)  
-BW_VVSL
+lm.fit(GDPPC, VVSL)
+bw_gdppc = 8258.64
+BW_VVSL = lm.predict([[bw_gdppc]])
+print(BW_VVSL)
